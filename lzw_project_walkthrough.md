@@ -106,16 +106,16 @@ This ensures no data is lost.
 
 Let's trace every step manually:
 
-| Étape | `w` | `k` | `w+k` | Dans le dico ? | Action | Code émis | Nouvelle entrée |
-|-------|-----|-----|-------|----------------|--------|-----------|-----------------|
-| 1 | `a` | `b` | `ab` | non | Émettre `a`=0, ajouter `ab`=3, reset `w`=`b` | **0** | `ab = 3` |
-| 2 | `b` | `a` | `ba` | non | Émettre `b`=1, ajouter `ba`=4, reset `w`=`a` | **1** | `ba = 4` |
-| 3 | `a` | `b` | `ab` | oui | Étendre : `w` = `ab` | - | - |
-| 4 | `ab` | `a` | `aba` | non | Émettre `ab`=3, ajouter `aba`=5, reset `w`=`a` | **3** | `aba = 5` |
-| 5 | `a` | `b` | `ab` | oui | Étendre : `w` = `ab` | - | - |
-| 6 | `ab` | `a` | `aba` | oui | Étendre : `w` = `aba` | - | - |
-| 7 | `aba` | `b` | `abab` | non | Émettre `aba`=5, ajouter `abab`=6, reset `w`=`b` | **5** | `abab = 6` |
-| 8 | `b` | FIN | - | - | Flush : émettre `b`=1 | **1** | - |
+| Step | `w` | `k` | `w+k` | In dict? | Action | Output code | New entry |
+|------|-----|-----|-------|----------|--------|-------------|-----------|
+| 1 | `a` | `b` | `ab` | no | Emit `a`=0, add `ab`=3, reset `w`=`b` | **0** | `ab = 3` |
+| 2 | `b` | `a` | `ba` | no | Emit `b`=1, add `ba`=4, reset `w`=`a` | **1** | `ba = 4` |
+| 3 | `a` | `b` | `ab` | yes | Extend: `w` = `ab` | - | - |
+| 4 | `ab` | `a` | `aba` | no | Emit `ab`=3, add `aba`=5, reset `w`=`a` | **3** | `aba = 5` |
+| 5 | `a` | `b` | `ab` | yes | Extend: `w` = `ab` | - | - |
+| 6 | `ab` | `a` | `aba` | yes | Extend: `w` = `aba` | - | - |
+| 7 | `aba` | `b` | `abab` | no | Emit `aba`=5, add `abab`=6, reset `w`=`b` | **5** | `abab = 6` |
+| 8 | `b` | END | - | - | Flush: emit `b`=1 | **1** | - |
 
 **Result:** codes = `[0, 1, 3, 5, 1]`
 
@@ -132,8 +132,8 @@ The function also builds a `trace_steps` list — one dictionary per step — re
 |-------|---------|
 | `step` | Step number (1-indexed) |
 | `current_w` | The current word `w` at the start of this step |
-| `read_char` | The character `k` just read (or `"FIN"`) |
-| `in_dictionary` | Was `w+k` already in the dictionary? (`"oui"` / `"non"` / `"-"`) |
+| `read_char` | The character `k` just read (or `"END"`) |
+| `in_dictionary` | Was `w+k` already in the dictionary? (`"yes"` / `"no"` / `"-"`) |
 | `output_code` | The code emitted (or `"-"` if nothing was emitted) |
 | `new_entry` | The new entry added to the dictionary (or `"-"`) |
 
@@ -143,12 +143,12 @@ This is purely for **pedagogical / debugging purposes** — it lets you see exac
 
 ### 4.4 Printing the Trace — `print_trace()`
 
-Formats the trace as an aligned, ASCII table with French column headers:
+Formats the trace as an aligned, ASCII table:
 
 ```
-Étape | w courant | Caractère lu k | w+k dans le dico ? | Code émis | Nouvelle entrée
-------+-----------+----------------+--------------------+-----------+----------------
-1     | a         | b              | non                | 0         | ab = 3
+Step | Current w | Read char k | w+k in dict? | Output code | New dict entry
+-----+-----------+-------------+--------------+-------------+---------------
+1    | a         | b           | no           | 0           | ab = 3
 ...
 ```
 
@@ -158,16 +158,16 @@ It dynamically computes column widths so that everything lines up regardless of 
 
 ### 4.5 Printing the Dictionary — `print_dictionary()`
 
-Displays every entry in the final dictionary, sorted by code, and labels each as **initiale** (part of the base alphabet) or **ajoutée** (learned during compression). Column widths are computed dynamically so the table stays aligned even for very long substrings:
+Displays every entry in the final dictionary, sorted by code, and labels each as **initial** (part of the base alphabet) or **added** (learned during compression). Column widths are computed dynamically so the table stays aligned even for very long substrings:
 
 ```
-Indice | Sous-chaîne | Type
--------+-------------+---------
-     0 | a           | initiale
-     1 | b           | initiale
-     2 | c           | initiale
-     3 | ab          | ajoutée
-     ...
+Index | Substring | Kind
+------+-----------+--------
+    0 | a         | initial
+    1 | b         | initial
+    2 | c         | initial
+    3 | ab        | added
+    ...
 ```
 
 ---
@@ -194,7 +194,7 @@ python3 lzw_compress.py abababab
 python3 lzw_compress.py
 ```
 
-Surrounding whitespace is stripped from both CLI arguments and interactive input. A UTF-8 stdout guard (`sys.stdout.reconfigure`) ensures accented French labels do not crash on non-UTF-8 consoles.
+Surrounding whitespace is stripped from both CLI arguments and interactive input. A UTF-8 stdout guard (`sys.stdout.reconfigure`) ensures the program does not crash on non-UTF-8 consoles.
 
 `main()` then:
 1. Runs compression (which validates the input internally)
@@ -227,7 +227,7 @@ Confirms `lzw_compress` itself (not just `validate_input`) raises `ValueError` f
 
 ### `TestTrace` — Trace structure
 
-For `"abababab"`: the trace has 8 rows, the FIN row emits code 1, and collecting non-placeholder output codes gives exactly `[0, 1, 3, 5, 1]`.
+For `"abababab"`: the trace has 8 rows, the END row emits code 1, and collecting non-placeholder output codes gives exactly `[0, 1, 3, 5, 1]`.
 
 ### `TestRoundTrip` — Independent decoder round-trip
 
@@ -291,8 +291,8 @@ flowchart LR
         D --> SUB
         SUB --> R["Reconstructed string\n'abababab'"]
         R --> V{"Original == Reconstructed?"}
-        V -->|Oui| OK["Vérification OK"]
-        V -->|Non| FAIL["Vérification ÉCHEC"]
+        V -->|Yes| OK["Verification OK"]
+        V -->|No| FAIL["Verification FAILED"]
     end
 ```
 

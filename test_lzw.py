@@ -117,7 +117,7 @@ class TestTrace(unittest.TestCase):
 
         # The final (FIN) row must emit code 1 (for 'b')
         last_row = trace_steps[-1]
-        self.assertEqual(last_row["read_char"], "FIN")
+        self.assertEqual(last_row["read_char"], "END")
         self.assertEqual(last_row["output_code"], 1)
 
         # Collecting non-placeholder output codes reproduces the code list

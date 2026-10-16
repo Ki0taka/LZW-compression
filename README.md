@@ -27,35 +27,35 @@ python3 -m unittest -v
 Actual output for `python3 lzw_compress.py abababab`:
 
 ```text
-Entrée : abababab
+Input: abababab
 
-Trace de compression :
-Étape | w courant | Caractère lu k | w+k dans le dico ? | Code émis | Nouvelle entrée
-------+-----------+----------------+--------------------+-----------+----------------
-1     | a         | b              | non                | 0         | ab = 3
-2     | b         | a              | non                | 1         | ba = 4
-3     | a         | b              | oui                | -         | -
-4     | ab        | a              | non                | 3         | aba = 5
-5     | a         | b              | oui                | -         | -
-6     | ab        | a              | oui                | -         | -
-7     | aba       | b              | non                | 5         | abab = 6
-8     | b         | FIN            | -                  | 1         | -
+Compression trace:
+Step | Current w | Read char k | w+k in dict? | Output code | New dict entry
+-----+-----------+-------------+--------------+-------------+---------------
+1    | a         | b           | no           | 0           | ab = 3
+2    | b         | a           | no           | 1           | ba = 4
+3    | a         | b           | yes          | -           | -
+4    | ab        | a           | no           | 3           | aba = 5
+5    | a         | b           | yes          | -           | -
+6    | ab        | a           | yes          | -           | -
+7    | aba       | b           | no           | 5           | abab = 6
+8    | b         | END         | -            | 1           | -
 
-Codes : [0, 1, 3, 5, 1]
+Codes: [0, 1, 3, 5, 1]
 
-Dictionnaire final :
-Indice | Sous-chaîne | Type
--------+-------------+---------
-     0 | a           | initiale
-     1 | b           | initiale
-     2 | c           | initiale
-     3 | ab          | ajoutée
-     4 | ba          | ajoutée
-     5 | aba         | ajoutée
-     6 | abab        | ajoutée
+Final dictionary:
+Index | Substring | Kind
+------+-----------+--------
+    0 | a         | initial
+    1 | b         | initial
+    2 | c         | initial
+    3 | ab        | added
+    4 | ba        | added
+    5 | aba       | added
+    6 | abab      | added
 
-Substitution : a | b | ab | aba | b  ->  abababab  (Vérification OK)
-Résumé de la compression : longueur originale = 8, nombre de codes = 5, ratio = 0.625
+Substitution: a | b | ab | aba | b  ->  abababab  (Verification OK)
+Compression summary: original length = 8, number of codes = 5, ratio = 0.625
 ```
 
 ## Example 2 — `aaaaaa` (repeated character)
@@ -63,29 +63,29 @@ Résumé de la compression : longueur originale = 8, nombre de codes = 5, ratio 
 Actual output for `python3 lzw_compress.py aaaaaa`:
 
 ```text
-Entrée : aaaaaa
+Input: aaaaaa
 
-Trace de compression :
-Étape | w courant | Caractère lu k | w+k dans le dico ? | Code émis | Nouvelle entrée
-------+-----------+----------------+--------------------+-----------+----------------
-1     | a         | a              | non                | 0         | aa = 3
-2     | a         | a              | oui                | -         | -
-3     | aa        | a              | non                | 3         | aaa = 4
-4     | a         | a              | oui                | -         | -
-5     | aa        | a              | oui                | -         | -
-6     | aaa       | FIN            | -                  | 4         | -
+Compression trace:
+Step | Current w | Read char k | w+k in dict? | Output code | New dict entry
+-----+-----------+-------------+--------------+-------------+---------------
+1    | a         | a           | no           | 0           | aa = 3
+2    | a         | a           | yes          | -           | -
+3    | aa        | a           | no           | 3           | aaa = 4
+4    | a         | a           | yes          | -           | -
+5    | aa        | a           | yes          | -           | -
+6    | aaa       | END         | -            | 4           | -
 
-Codes : [0, 3, 4]
+Codes: [0, 3, 4]
 
-Dictionnaire final :
-Indice | Sous-chaîne | Type
--------+-------------+---------
-     0 | a           | initiale
-     1 | b           | initiale
-     2 | c           | initiale
-     3 | aa          | ajoutée
-     4 | aaa         | ajoutée
+Final dictionary:
+Index | Substring | Kind
+------+-----------+--------
+    0 | a         | initial
+    1 | b         | initial
+    2 | c         | initial
+    3 | aa        | added
+    4 | aaa       | added
 
-Substitution : a | aa | aaa  ->  aaaaaa  (Vérification OK)
-Résumé de la compression : longueur originale = 6, nombre de codes = 3, ratio = 0.500
+Substitution: a | aa | aaa  ->  aaaaaa  (Verification OK)
+Compression summary: original length = 6, number of codes = 3, ratio = 0.500
 ```

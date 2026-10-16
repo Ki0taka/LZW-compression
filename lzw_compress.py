@@ -36,7 +36,7 @@ def lzw_compress(text: str) -> tuple[list[int], dict[str, int], list[dict[str, A
         if found:
             trace_steps.append({
                 "step": step_number, "current_w": w, "read_char": k,
-                "in_dictionary": "oui", "output_code": "-", "new_entry": "-",
+                "in_dictionary": "yes", "output_code": "-", "new_entry": "-",
             })
             w = candidate
         else:
@@ -44,7 +44,7 @@ def lzw_compress(text: str) -> tuple[list[int], dict[str, int], list[dict[str, A
             dictionary[candidate] = next_code
             trace_steps.append({
                 "step": step_number, "current_w": w, "read_char": k,
-                "in_dictionary": "non", "output_code": emitted,
+                "in_dictionary": "no", "output_code": emitted,
                 "new_entry": f"{candidate} = {next_code}",
             })
             codes.append(emitted)
@@ -53,7 +53,7 @@ def lzw_compress(text: str) -> tuple[list[int], dict[str, int], list[dict[str, A
 
     codes.append(dictionary[w])
     trace_steps.append({
-        "step": len(text), "current_w": w, "read_char": "FIN",
+        "step": len(text), "current_w": w, "read_char": "END",
         "in_dictionary": "-", "output_code": dictionary[w], "new_entry": "-",
     })
     return codes, dictionary, trace_steps
@@ -62,9 +62,9 @@ def lzw_compress(text: str) -> tuple[list[int], dict[str, int], list[dict[str, A
 def print_trace(trace_steps: list[dict[str, Any]]) -> None:
     """Print the compression trace in aligned plain-text columns."""
     columns = [
-        ("Étape", "step"), ("w courant", "current_w"), ("Caractère lu k", "read_char"),
-        ("w+k dans le dico ?", "in_dictionary"), ("Code émis", "output_code"),
-        ("Nouvelle entrée", "new_entry"),
+        ("Step", "step"), ("Current w", "current_w"), ("Read char k", "read_char"),
+        ("w+k in dict?", "in_dictionary"), ("Output code", "output_code"),
+        ("New dict entry", "new_entry"),
     ]
     widths = [max(len(title), *(len(str(row[key])) for row in trace_steps)) for title, key in columns]
     print(" | ".join(title.ljust(width) for (title, _), width in zip(columns, widths)))
@@ -76,12 +76,12 @@ def print_trace(trace_steps: list[dict[str, Any]]) -> None:
 def print_dictionary(dictionary: dict[str, int]) -> None:
     """Print entries sorted by code, identifying initial and added entries."""
     entries = sorted(dictionary.items(), key=lambda item: item[1])
-    labels = [("initiale" if index < len(INITIAL_ALPHABET) else "ajoutée")
+    labels = [("initial" if index < len(INITIAL_ALPHABET) else "added")
               for _, index in entries]
-    w_idx = max(len("Indice"), *(len(str(index)) for _, index in entries))
-    w_sub = max(len("Sous-chaîne"), *(len(substring) for substring, _ in entries))
-    w_kind = max(len("Type"), *(len(label) for label in labels))
-    print(f"{'Indice'.ljust(w_idx)} | {'Sous-chaîne'.ljust(w_sub)} | {'Type'.ljust(w_kind)}")
+    w_idx = max(len("Index"), *(len(str(index)) for _, index in entries))
+    w_sub = max(len("Substring"), *(len(substring) for substring, _ in entries))
+    w_kind = max(len("Kind"), *(len(label) for label in labels))
+    print(f"{'Index'.ljust(w_idx)} | {'Substring'.ljust(w_sub)} | {'Kind'.ljust(w_kind)}")
     print(f"{'-' * w_idx}-+-{'-' * w_sub}-+-{'-' * w_kind}")
     for (substring, index), label in zip(entries, labels):
         print(f"{str(index).rjust(w_idx)} | {substring.ljust(w_sub)} | {label}")
@@ -102,34 +102,34 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     parser = argparse.ArgumentParser(
-        description="Compresse une chaîne sur {a, b, c} avec LZW.",
+        description="Compress a string over {a, b, c} using LZW.",
     )
     parser.add_argument("text", nargs="?",
-                        help="texte en entrée (si omis, une invite s'affiche)")
+                        help="input text (if omitted, you will be prompted)")
     args = parser.parse_args()
     text = (args.text.strip() if args.text is not None
-            else input("Entrez une chaîne sur {a, b, c} : ").strip())
+            else input("Enter a string over {a, b, c}: ").strip())
 
     try:
         codes, dictionary, trace_steps = lzw_compress(text)
     except ValueError as error:
-        print(f"Erreur : {error}", file=sys.stderr)
+        print(f"Error: {error}", file=sys.stderr)
         raise SystemExit(1) from None
 
-    print(f"Entrée : {text}")
-    print("\nTrace de compression :")
+    print(f"Input: {text}")
+    print("\nCompression trace:")
     print_trace(trace_steps)
-    print("\nCodes :", codes)
-    print("\nDictionnaire final :")
+    print("\nCodes:", codes)
+    print("\nFinal dictionary:")
     print_dictionary(dictionary)
 
     pieces = substitute_codes(codes, dictionary)
     reconstructed = "".join(pieces)
-    status = "Vérification OK" if reconstructed == text else "Vérification ÉCHEC"
-    print(f"\nSubstitution : {' | '.join(pieces)}  ->  {reconstructed}  ({status})")
+    status = "Verification OK" if reconstructed == text else "Verification FAILED"
+    print(f"\nSubstitution: {' | '.join(pieces)}  ->  {reconstructed}  ({status})")
     ratio = len(codes) / len(text)
-    print(f"Résumé de la compression : longueur originale = {len(text)}, "
-          f"nombre de codes = {len(codes)}, ratio = {ratio:.3f}")
+    print(f"Compression summary: original length = {len(text)}, "
+          f"number of codes = {len(codes)}, ratio = {ratio:.3f}")
 
 
 if __name__ == "__main__":
