@@ -1,6 +1,6 @@
 # LZW compression (Project n°2)
 
-A standard-library-only implementation of LZW compression for strings over the alphabet `{a, b, c}`. It prints a per-step trace, the final dictionary, output codes, a substitution-based reconstruction check, and a compression ratio.
+This project provides a clear, standard-library-only implementation of the **Lempel–Ziv–Welch (LZW)** lossless compression algorithm for strings over the alphabet `{a, b, c}`. It demonstrates dictionary-based encoding by printing a step-by-step compression trace, the final dictionary, generated output codes, and a substitution-based reconstruction to verify that the original input is preserved.
 
 ## Run
 
@@ -32,12 +32,12 @@ Step | Current w | Read char k | w+k in dict? | Output code | New dict entry
 -----+-----------+-------------+--------------+-------------+---------------
 1    | a         | b           | False        | 0           | ab = 3
 2    | b         | a           | False        | 1           | ba = 4
-3    | a         | b           | True         | —           | —
+3    | a         | b           | True         | —            | —
 4    | ab        | a           | False        | 3           | aba = 5
-5    | a         | b           | True         | —           | —
-6    | ab        | a           | True         | —           | —
+5    | a         | b           | True         | —            | —
+6    | ab        | a           | True         | —            | —
 7    | aba       | b           | False        | 5           | abab = 6
-8    | b         | END         | —            | 1           | —
+8    | b         | END         | —            | —           | 1
 
 Codes: [0, 1, 3, 5, 1]
 
